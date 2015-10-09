@@ -1,7 +1,5 @@
 .Rhistory
 .RData
 .Rproj.user/
-01_data/
-03_Paper/figures/
-03_Paper/tables/
+01_Data/data.csv
 .Rproj.user
