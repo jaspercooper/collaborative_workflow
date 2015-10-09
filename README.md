@@ -4,6 +4,16 @@
 
 ### Why it is good
 
+  - a tool for tracking, labeling and syncing changes in *line-based* documents
+  
+  - full control of what and when you sync with collaborators
+  
+  - minimization and easy handling of conflicts
+  
+  - no redundant multiplication of versions
+  
+  - great tools for setting deadlines, raising and solving issues, and distributing tasks
+
 ### What a repository is 
 
 ### How to add one in the desktop app
