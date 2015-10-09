@@ -42,7 +42,7 @@ Today we will **clone** this repo
 
 Changes:
 
-  - any time you make a change to a line of code and save it, say in `R` or \LaTeX, GH will make a note of it
+  - any time you make a change to a line of code and save it, say in `R` or LaTeX, GH will make a note of it
   
   - however, making changes doesn't yet do anything for our collaborators
   
@@ -55,7 +55,7 @@ Changes:
 
 Commits: 
   
-  - every line of code can be seperately *committed*: this means that you've made the change, and now you want to share it with others
+  - every line of code can be separately *committed*: this means that you've made the change, and now you want to share it with others
   
   - labeling commits is extremely important and helpful for collaborators 
 
@@ -112,11 +112,56 @@ Commits:
 
 ## Doing Research Together
 
-### Folder structure
+### The project directory
 
+Assuming you are working in `R` and `LaTeX` (as you should be), there are a few principles to adopt:
+  - never put spaces in the titles
+  - always number the folders in the main directory, this makes navigating easier as the order of files is always preserved
+  - always have an `__archive` folder in the top for throwing old versions of things in (even with versioning this can be helpful)
+  - always have an .Rproj file in the main project directory (more on this later)
+  - always label versions of documents such as paper drafts with `YYYY_MM_DD_` at the beginning: this ensures that versions are always ordered chronologically
+  - always adopt the principle of modularity: one script for one operation or set of operations
+  - always think forwards to the pre-registration document or the replication archive
+
+A good way to structure a directory: 
+
+  - `00_Archive` - A bunch of old scrap code, notes, data, etc.
+    
+  - `01_Data`
+    - `Raw_data` - The data in its raw `.csv` format, with *no* changes made to it
+    - `Clean_data` - The data in its cleaned form, once a specific R script has cleaned it up
+  
+  - `02_Analysis` - Typically contains all of the R scripts in one go, although you may have subfolders (i.e. for spatial analysis etc.). The scripts should generally do one thing each, and all be run by one central "main script", whose purpose is to control a few key parameters and source the other ones in. More on this below
+  
+  - `03_Paper` - This should contain the main `.tex` files, the `.bib`, `.sty`, and other files that `.tex` wants direct access to
+    - `figures` - We will output directly from R into this folder, then source the images in from here
+    - `tables` - Each table will be output from R in a tabular environment, and sourced into the main `.tex` file
+    - `presentations` - It makes sense to put beamer presentations etc. into here, because that way you can just copy and paste the image and table code from the paper, and just add `../` to the file paths (more below)
+  
+  - `04_Presentations` or `04_Literature` - Other folders that probably won't go into the replication archive but are useful for the project
+    
 ### Avoiding working directory issues
+  
+  - A huge issue in collaborative workflows are file path conflicts
+  
+  - It is possible to avoid them entirely:
+    - **path file tip 1**: always run R from the `.Rproj` file: this automatically sets the working directory to the local project folder on the computer of the user, so all scripts can be run with reference to the project folder. This is also true for the replication archive: make sure to include the `.Rproj` file in it.
+    - **path file tip 2**: in R, open up some quotes `"..."` and press `tab` to get suggestions for file paths. 
+    - **path file tip 3**: use `../` to navigate up a level. 
+    - **path file tip 4**: never use `setwd()`, you shouldn't have to.
+    - **path file tip 5**: never make reference to your local path structure, you shouldn't have to.
+    - **path file tip 6**: by default, `.tex` files always treat their folder as the directory for sourcing stuff like figures, `.bib` files, other `.tex` files, etc.
 
 ### Sourcing R scripts
+
+R can run other scripts from a single script. 
+
+There are three huge advantages to writing R scripts in a very modular way and running them from one main script: 
+  1. It makes it much easier for collaborators to see what is being done where. So, for example, if I want to re-do the main analysis tables with an extra interaction throughout the models, I can just copy the `.R` script called `01_main_analysis.R`, call it `04_main_analysis_interacted.R`, and then add that
+  2. It keeps the environment clear. You can make R scripts "tidy up" after themselves by including `rm(stuff,you,dont,need)` at the end.
+  3. It makes it easier to jump into the workflow at any point. Good practice is to have at least one script that cleans and outputs data, and another script that loads the helper functions you will be using. Once these are loaded you can usually skip the other analysis steps and just run new analyses.  
+
+Lets look at the examples in `02_Analysis`. 
 
 ### Sinking and inputting LaTeX tables
 
