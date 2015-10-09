@@ -1,7 +1,5 @@
 # Tools for researching and publishing with collaborators
 
- ----------------------------------------------------------------------------
-
 ## GitHub
 
 ### Why it is good
