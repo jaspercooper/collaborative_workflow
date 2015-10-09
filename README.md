@@ -94,7 +94,7 @@ Commits:
 
   - issues can be opened and closed on the online repo
   
-  - they are a super-convnient way to set goals and track progress
+  - they are a super-convenient way to set goals and track progress
   
   - you can set milestones with dates
   
@@ -117,8 +117,8 @@ Commits:
 Assuming you are working in `R` and `LaTeX` (as you should be), there are a few principles to adopt:
   - never put spaces in the titles
   - always number the folders in the main directory, this makes navigating easier as the order of files is always preserved
-  - always have an `__archive` folder in the top for throwing old versions of things in (even with versioning this can be helpful)
-  - always have an .Rproj file in the main project directory (more on this later)
+  - always have an `__archive` folder in the top for throwing old versions of things in (even with versifying this can be helpful)
+  - always have an .Project file in the main project directory (more on this later)
   - always label versions of documents such as paper drafts with `YYYY_MM_DD_` at the beginning: this ensures that versions are always ordered chronologically
   - always adopt the principle of modularity: one script for one operation or set of operations
   - always think forwards to the pre-registration document or the replication archive
@@ -197,7 +197,7 @@ Lets look at the examples in `02_Analysis`.
 
   - a host of amazing tools for building websites in Markdown now exist
   
-  - here is [one example](http://alpha.experimentr.org) built using [Travis](https://travis-ci.org)
+  - here is [one example](http://alpha.experimentr.org) built using [Jekyll](http://jekyllrb.com/docs/sites/)
 
 
 
