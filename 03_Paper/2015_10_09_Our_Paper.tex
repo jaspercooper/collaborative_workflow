@@ -1,0 +1,35 @@
+\documentclass[11pt,english]{article}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{float}
+
+\begin{document}
+
+\title{
+A Collaborative Effort
+}
+
+\author{Me and All My Friends}
+
+\maketitle
+
+\clearpage
+
+\section{Our Results}
+
+\begin{table}[H]
+\centering
+\input{tables/main_results.tex}
+\label{tab:main_results}
+\caption{Revolutionary Findings}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/boxplot.pdf}
+\caption{Box Plot}
+\label{fig:box_plot}
+\end{figure}
+
+\end{document}
+
