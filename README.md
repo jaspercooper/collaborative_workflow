@@ -145,12 +145,12 @@ A good way to structure a directory:
   - A huge issue in collaborative workflows are file path conflicts
   
   - It is possible to avoid them entirely:
-    - **path file tip 1**: always run R from the `.Rproj` file: this automatically sets the working directory to the local project folder on the computer of the user, so all scripts can be run with reference to the project folder. This is also true for the replication archive: make sure to include the `.Rproj` file in it.
-    - **path file tip 2**: in R, open up some quotes `"..."` and press `tab` to get suggestions for file paths. 
-    - **path file tip 3**: use `../` to navigate up a level. 
-    - **path file tip 4**: never use `setwd()`, you shouldn't have to.
-    - **path file tip 5**: never make reference to your local path structure, you shouldn't have to.
-    - **path file tip 6**: by default, `.tex` files always treat their folder as the directory for sourcing stuff like figures, `.bib` files, other `.tex` files, etc.
+    - **file path tip 1**: always run R from the `.Rproj` file: this automatically sets the working directory to the local project folder on the computer of the user, so all scripts can be run with reference to the project folder. This is also true for the replication archive: make sure to include the `.Rproj` file in it.
+    - **file path tip 2**: in R, open up some quotes `"..."` and press `tab` to get suggestions for file paths. 
+    - **file path tip 3**: use `../` to navigate up a level. 
+    - **file path tip 4**: never use `setwd()`, you shouldn't have to.
+    - **file path tip 5**: never make reference to your local path structure, you shouldn't have to.
+    - **file path tip 6**: by default, `.tex` files always treat their folder as the directory for sourcing stuff like figures, `.bib` files, other `.tex` files, etc.
 
 ### Sourcing R scripts
 
@@ -165,16 +165,39 @@ Lets look at the examples in `02_Analysis`.
 
 ### Sinking and inputting LaTeX tables
 
+  - **Never** copy and paste tables
+  - `sink()` them into `.tex` files from `R` using `stargazer`
+  - then `\input{}` them into your LaTeX paper
+  - this is akin to a manual version of `knitr` 
+    - advantage of stability
+    - and tables can be sourced in across documents, only running code once
+  - any updates to the analysis are immediately integrated into the analysis 
+    when you compile the `.tex` document
+  - never worry about compiling weirdness
+  - can make sense to use `knitr`, but not always efficient 
+  
+> Let's look at an example
+
 ### Sinking and inputting figures
+
+  - You can output and input `.pdf` and `.png` files in much the same way
+  - use `pdf()` in `R` and `\includegraphics[]{}` in LaTeX
+
+> Let's look at an example
 
 ## Quick web-publishing
 
-### Making html files
+### Pushing .html files to your website
 
-### Pushing them to your website
+  - build the `.html` file in `.Rmd`
+  
+  - upload it to your website using SFTP!!!
 
 ### GH Pages, Travis, etc.
 
+  - a host of amazing tools for building websites in Markdown now exist
+  
+  - here is [one example](http://alpha.experimentr.org) built using [Travis](https://travis-ci.org)
 
 
 
