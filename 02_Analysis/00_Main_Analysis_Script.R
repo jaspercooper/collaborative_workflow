@@ -1,30 +1,40 @@
 # Our awesome collaborative project ---------------------------------------
 
+rm(list = ls())
+library(stargazer)
 
+# Run the code that creates useful functions ------------------------------
+
+source("02_Analysis/01_Helper_Functions.R")
 
 # Run the code that generates our dummy data ------------------------------
 
-# Define breaks 
+# Set the random number seed
+RNG_seed <- 1234
 
-income_breaks <- quantile(x = 0:1)
+# Define population parameters
+N <- 100
+J <- 5
 
-source("02_Analysis/01_Generate_Fake_Data.R")
+# Generate the data
+source("02_Analysis/02_Generate_Fake_Data.R")
 
+# Take a look at the data
+head(data)
 
+# Run the code to generate the main analyses ------------------------------
 
+# Run analyses
+source("02_Analysis/03_Main_Analyses_.R")
 
+# Let's look at them
+lapply(model_list,summary)
 
+# Run the code to generate tables -----------------------------------------
 
+source("02_Analysis/03_Main_Analyses_Table.R")
 
+# Run the code to output figures ------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
+source("02_Analysis/03_Main_Analyses_Plot.R")
 
