@@ -14,6 +14,7 @@
   
   - great tools for setting deadlines, raising and solving issues, and distributing tasks
 
+> *Note:* Because GitHub is intended for programmers, it is not always the best way to share things such as large binary data files, word documents and images (although all of this is possible). For files that are unlikely to change, it is sometimes better to store them on Dropbox and then source in the data from R. 
 ### What a repository is 
 
 ### How to add one in the desktop app
