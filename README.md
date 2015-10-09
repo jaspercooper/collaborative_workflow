@@ -1,4 +1,4 @@
-# Tools for researching and publishing with collaborators
+# Collaborative Workflows: Columbia methods workshop on tools for researching and publishing with collaborators
 
 ## GitHub
 
