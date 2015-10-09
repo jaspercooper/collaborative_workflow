@@ -27,9 +27,6 @@ head(data)
 # Run analyses
 source("02_Analysis/03_Main_Analyses_.R")
 
-# Let's look at them
-lapply(model_list,summary)
-
 # Run the code to generate tables -----------------------------------------
 
 source("02_Analysis/03_Main_Analyses_Table.R")
