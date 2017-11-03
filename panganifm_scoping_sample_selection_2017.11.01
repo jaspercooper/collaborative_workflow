@@ -1,0 +1,235 @@
+#--------------------------------------------------
+# Pangani FM Evaluation
+# Authors: Charles Cahalane, Dylan Groves
+# Last updated: November 1, 2017
+#--------------------------------------------------
+
+
+#--------------------------------------------------
+#  Packages
+#--------------------------------------------------
+ipak <- function(pkg){
+	new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+	if (length(new.pkg)) 
+	install.packages(new.pkg, dependencies = TRUE)
+	sapply(pkg, require, character.only = TRUE)
+	}
+
+packages <- c("rgeos", "rgdal", "sp", "raster", "scales") 
+
+ipak(packages)
+
+
+#--------------------------------------------------
+# Clear and set working directory
+#--------------------------------------------------
+rm(list=ls())
+#setwd("C:/Users/dgroves/Dropbox/PanganiFM/2 - Data and Analysis")
+setwd("C:/Users/charl/Dropbox/PanganiFM/2 - Data and Analysis")
+
+
+#--------------------------------------------------
+# Load Data
+#--------------------------------------------------
+
+vills <- readOGR(dsn = '0 - Raw Data/GIS Data/Villages/Tanzania/TANZANIA_VILLAGES.shp')
+roads <- readOGR(dsn = '0 - Raw Data/GIS Data/Roads/TZA_roads.shp')
+towns <- readOGR(dsn = '0 - Raw Data/GIS Data/OpenMap/tanzania-latest-free.shp/gis.osm_places_free_1.shp')
+roadpts <- read.csv('3 - Code/roadscoping.csv')
+
+
+#--------------------------------------------------
+# Generate Road Scoping Midpoints
+#--------------------------------------------------
+mids <- data.frame(matrix(c(1:3), nrow=3, ncol=3,dimnames = list(1:3,c("lat", "lon", "route"))))
+for(i in 1:3){
+j <- 2*i-1
+k <-2*i
+mids[i,1]<-mean(c(roadpts$lat[j:k]))
+mids[i,2]<-mean(c(roadpts$lon[j:k]))
+}
+coordinates(mids) = ~lon+lat
+proj4string(mids) <- "+proj=longlat +datum=WGS84"
+
+
+#--------------------------------------------------
+# Transform Data
+#--------------------------------------------------
+newcrs <- CRS("+proj=longlat +datum=WGS84")
+
+newcrs2 <- CRS("+proj=longlat +datum=WGS84 +init=epsg:3347")
+
+newcrs3 <-CRS("+proj=longlat +datum=WGS84 +init=epsg:26978 +units=km")
+
+newcrs4 <-CRS("+proj=aea +datum=WGS84 +init=epsg:26978 +units=km")
+
+newcrs5 <-CRS("+proj=utm +zone=10 +datum=WGS84 +init=epsg:26978 +units=km")
+
+newcrs6 <-CRS("+proj=utm +zone=37 +datum=WGS84 +units=km")
+
+vills <- spTransform(vills, newcrs6)
+
+roads <- spTransform(roads, newcrs6)
+
+towns <- spTransform(towns, newcrs6)
+
+mids <- spTransform(mids, newcrs6)
+
+
+#--------------------------------------------------
+# Subset Tanga and Bagamoyo
+#--------------------------------------------------
+vills <- vills[vills@data$District_N == "Bagamoyo" 
+	| vills@data$Region_Nam == "Tanga",]
+
+
+#--------------------------------------------------
+# Type Subset Roads and Towns
+#--------------------------------------------------
+roads <- roads[roads@data$RTT_DESCRI == "Primary Route"
+	| roads@data$RTT_DESCRI == "Secondary Route",]
+
+towns <- towns[towns@data$fclass == "city"
+	| towns@data$fclass == "town",]
+
+
+#--------------------------------------------------
+# Spatially Subset Roads and Towns
+#--------------------------------------------------
+roads <- roads[vills,]
+towns <- towns[vills,]
+
+
+#--------------------------------------------------
+# Approximate Road Scoping Boundary
+#--------------------------------------------------
+pangani <- towns[towns@data$name=="Pangani",]
+rads <- spDistsN1(mids,pangani,longlat=FALSE)
+
+
+#--------------------------------------------------
+# Get Village Centroids
+#--------------------------------------------------
+centroids3 <- getSpPPolygonsLabptSlots(vills)
+vills.cent <- SpatialPointsDataFrame(centroids3, vills@data, proj4string = newcrs6)
+
+
+#--------------------------------------------------
+# Buffer Roads and Towns
+#--------------------------------------------------
+width.t <- 10
+width.r <- 5
+
+buff.t <- gBuffer(towns, byid=T, id=NULL, width=width.t, quadsegs=50, capStyle="ROUND", joinStyle="ROUND", mitreLimit=1.0)
+buff.r <- gBuffer(roads, byid=T, id=NULL, width=width.r, quadsegs=50, capStyle="ROUND", joinStyle="ROUND", mitreLimit=1.0)
+
+buff.rt <- do.call(bind, c(buff.t, buff.r))
+
+revbuff <- gDifference(vills, buff.rt, byid=FALSE, id=NULL, drop_lower_td=FALSE, unaryUnion_if_byid_false=TRUE, checkValidity=FALSE)
+
+vills.cent.buff <- vills.cent[revbuff,]
+
+#--------------------------------------------------
+# Generate Zones
+#--------------------------------------------------
+panganicoords <- coordinates(pangani)
+
+endcoords.z01 <- c(381.2158, -413.3347)
+endcoords.z12 <- c(344.4939, -468.656)
+endcoords.z23 <- c(249.1123, -688.0336)
+endcoords.z30 <- c(449.4137, -774.354)
+
+zone1pts <- c(panganicoords, endcoords.z01, endcoords.z12, panganicoords)
+zone2pts <- c(panganicoords, endcoords.z12, endcoords.z23, panganicoords)
+zone3pts <- c(panganicoords, endcoords.z23, endcoords.z30, panganicoords)
+
+zone1pts <- matrix(zone1pts, ncol=2, byrow = TRUE)
+zone2pts <- matrix(zone2pts, ncol=2, byrow = TRUE)
+zone3pts <- matrix(zone3pts, ncol=2, byrow = TRUE)
+
+zone1 <- Polygon(zone1pts)
+zone2 <- Polygon(zone2pts)
+zone3 <- Polygon(zone3pts)
+
+zone1 <- SpatialPolygons(list(Polygons(list(zone1), ID = "1")), proj4string=newcrs6)
+zone2 <- SpatialPolygons(list(Polygons(list(zone2), ID = "2")), proj4string=newcrs6)
+zone3 <- SpatialPolygons(list(Polygons(list(zone3), ID = "3")), proj4string=newcrs6)
+
+
+#--------------------------------------------------
+# Subset Villages by Zone
+#--------------------------------------------------
+vills.1 <- vills.cent.buff[zone1,]
+vills.2 <- vills.cent.buff[zone2,]
+vills.3 <- vills.cent.buff[zone3,]
+
+
+#--------------------------------------------------
+# Subset Villages by Treatment-Control 
+#--------------------------------------------------
+width.pi <- max(mean(rads)/2, 60)
+width.pm <- mean(rads)
+width.po <- mean(rads)*1.5
+
+buff.pi <- gBuffer(pangani, byid=T, id=NULL, width=width.pi, quadsegs=50, capStyle="ROUND", joinStyle="ROUND", mitreLimit=1.0)
+buff.pm <- gBuffer(pangani, byid=T, id=NULL, width=width.pm, quadsegs=50, capStyle="ROUND", joinStyle="ROUND", mitreLimit=1.0)
+buff.po <- gBuffer(pangani, byid=T, id=NULL, width=width.po, quadsegs=50, capStyle="ROUND", joinStyle="ROUND", mitreLimit=1.0)
+
+area.t <- gDifference(buff.pm, buff.pi, byid=FALSE, id=NULL, drop_lower_td=FALSE, unaryUnion_if_byid_false=TRUE, checkValidity=FALSE)
+area.c <- gDifference(buff.po, buff.pm, byid=FALSE, id=NULL, drop_lower_td=FALSE, unaryUnion_if_byid_false=TRUE, checkValidity=FALSE)
+
+vills.1t <- vills.1[area.t,]
+vills.1c <- vills.1[area.c,]
+vills.2t <- vills.2[area.t,]
+vills.2c <- vills.2[area.c,]
+vills.3t <- vills.3[area.t,]
+vills.3c <- vills.3[area.c,]
+
+vills.23t <- rbind.SpatialPointsDataFrame(vills.2t, vills.3t)
+vills.23c <- rbind.SpatialPointsDataFrame(vills.2c, vills.3c)
+
+
+#--------------------------------------------------
+# Randomly Select Villages
+#--------------------------------------------------
+n <- 120
+
+vills.ids.1t <- sample(vills.1t@data$OBJECTID, n/6, replace = FALSE)
+vills.ids.23t <- sample(vills.23t@data$OBJECTID, n/3, replace = FALSE)
+vills.ids.1c <- sample(vills.1c@data$OBJECTID, n/6, replace = FALSE)
+vills.ids.23c <- sample(vills.23c@data$OBJECTID, n/3, replace = FALSE)
+
+vills.sel.1t <- vills[is.element(vills@data$OBJECTID, vills.ids.1t),]
+vills.sel.23t <- vills[is.element(vills@data$OBJECTID, vills.ids.23t),]
+vills.sel.1c <- vills[is.element(vills@data$OBJECTID, vills.ids.1c),]
+vills.sel.23c <- vills[is.element(vills@data$OBJECTID, vills.ids.23c),]
+
+vills.sel.t <- rbind.SpatialPolygonsDataFrame(vills.sel.1t, vills.sel.23t)
+vills.sel.c <- rbind.SpatialPolygonsDataFrame(vills.sel.1c, vills.sel.23c)
+
+
+#--------------------------------------------------
+# Plot Data
+#--------------------------------------------------
+plot(vills, col="lightgrey", border="white")
+plot(vills.sel.t, col=alpha("green", .5), border="white", add=T)
+plot(vills.sel.c, col=alpha("blue", .5), border="white", add=T)
+points(towns, pch=16, cex=1, col="red")
+plot(roads, col = "red", add = T)
+points(pangani, pch=16, cex=1, col="black")
+plot(area.t, add=T)
+plot(area.c, add=T)
+
+
+#--------------------------------------------------
+# Write CSV Files
+#--------------------------------------------------
+CSVcolnames <- c("Village", "Ward", "District", "Region")
+vills.treatment <- data.frame(vills.sel.t@data$Vil_Mtaa_N, vills.sel.t@data$Ward_Name, vills.sel.t@data$District_N, vills.sel.t@data$Region_Nam)
+colnames(vills.treatment) <- CSVcolnames
+write.csv(vills.treatment, file = "3 - Code/treatmentvillages.csv", row.names = F)
+
+CSVcolnames <- c("Village", "Ward", "District", "Region")
+vills.control <- data.frame(vills.sel.t@data$Vil_Mtaa_N, vills.sel.t@data$Ward_Name, vills.sel.t@data$District_N, vills.sel.t@data$Region_Nam)
+colnames(vills.control) <- CSVcolnames
+write.csv(vills.control, file = "3 - Code/controlvillages.csv", row.names = F)
