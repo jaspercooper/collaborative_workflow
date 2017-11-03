@@ -10,5 +10,6 @@ output: ioslides_presentation
 ## Check out these results!
 
 ```{r,echo=FALSE}
+data <- read.csv("../../01_Data/data.csv")
 with(data,plot(x = income,y = Y))
 ```
